@@ -1,27 +1,93 @@
-# AngularWebpackDashboard
+# angular-webpack-dashboard
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.2.1.
+This project serves as a simple example of how to get [`webpack-dashboard`](https://github.com/FormidableLabs/webpack-dashboard) running with Angular CLI >= @6 _without ejecting_.
 
-## Development server
+The workflow takes advantage of Angular 6 builders to inject the necessary config to load `webpack-dashboard`. You can follow this [article](https://codeburst.io/customizing-angular-cli-6-build-an-alternative-to-ng-eject-a48304cd3b21) or read the steps below.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+### Make sure you have Angular CLI >= @6 installed.
 
-## Code scaffolding
+```sh
+npm install -g @angular/cli
+ng new angular-webpack-dashboard
+cd angular-webpack-dashboard
+```
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### Add `@angular-builders/custom-webpack`.
 
-## Build
+```sh
+npm i -D @angular-builders/custom-webpack
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+### Update `angular.json`
 
-## Running unit tests
+```json
+"architect": {
+   ...
+  "build": {
+      "builder": "@angular-builders/custom-webpack:browser"
+      "options": {
+            ...
+      }
+  ...
+}
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### Add `customWebpackConfig` to the build target options.
 
-## Running end-to-end tests
+```json
+"architect": {
+   ...
+  "build": {
+      "builder": "@angular-builders/custom-webpack:browser"
+      "options": {
+            "customWebpackConfig": {
+               "path": "./extra-webpack.config.js"
+            }
+            ...
+      }
+  ...
+}
+```
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+### Install `webpack-dashboard`.
 
-## Further help
+```sh
+npm i -D webpack-dashboard
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+### Create `extra-webpack.config.js` in the project root.
+
+```js
+const DashboardPlugin = require("webpack-dashboard/plugin");
+
+module.exports = {
+  plugins: [new DashboardPlugin()]
+};
+```
+
+### Use `@angular-builders/dev-server`.
+
+```sh
+npm i -D @angular-builders/dev-server
+```
+
+Then, in `angular.json`:
+
+```json
+"serve": {
+  "builder": "@angular-builders/dev-server:generic",
+  ...
+}
+```
+
+### Update the `package.json` `start` script.
+
+```json
+"scripts": {
+  "ng": "ng",
+  "start": "webpack-dashboard -- ng serve",
+  ...
+}
+```
+
+### Run `npm start` and party!
